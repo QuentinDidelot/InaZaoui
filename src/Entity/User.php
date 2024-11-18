@@ -5,11 +5,15 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -20,7 +24,7 @@ class User
     private bool $admin = false;
 
     #[ORM\Column]
-    private ?string $name;
+    private ?string $username;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description;
@@ -30,6 +34,12 @@ class User
 
     #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user')]
     private Collection $medias;
+
+    #[ORM\Column]
+    private ?string $password = null;
+
+    #[ORM\Column]
+    private array $roles = [];
 
     public function __construct()
     {
@@ -53,14 +63,16 @@ class User
         return $this;
     }
 
-    public function getName(): ?string
+    public function getUsername(): ?string
     {
-        return $this->name;
+        return $this->username;
     }
 
-    public function setName(?string $name): void
+    public function setUsername(string $username): static
     {
-        $this->name = $name;
+        $this->username = $username;
+
+        return $this;
     }
 
     public function getDescription(): ?string
@@ -92,4 +104,72 @@ class User
     {
         $this->admin = $admin;
     }
+
+
+    /**
+     * @see PasswordAuthenticatedUserInterface
+     */
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+
+    /**
+     * @see UserInterface
+     *
+     * @return list<string>
+     */
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        // guarantee every user at least has ROLE_USER
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    /**
+     * A visual identifier that represents this user.
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->username;
+    }
+
+    /**
+     * @see UserInterface
+     */
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary, sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getSalt(): ?string
+    {
+        // Un sel explicite n'est pas nécessaire si vous utilisez bcrypt ou argon2
+        return null;
+    }
+    
 }
+
