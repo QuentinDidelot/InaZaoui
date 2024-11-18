@@ -5,53 +5,59 @@ namespace App\Controller;
 use App\Entity\Album;
 use App\Entity\Media;
 use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController
 {
-    /**
-     * @Route("/", name="home")
-     */
+    public function __construct(private readonly EntityManagerInterface $entityManager)
+    {
+    }
+
+    #[Route('/', name: 'home')]
     public function home()
     {
         return $this->render('front/home.html.twig');
     }
 
-    /**
-     * @Route("/guests", name="guests")
-     */
+    #[Route('/guests', name: 'guests')]
     public function guests()
     {
-        $guests = $this->getDoctrine()->getRepository(User::class)->findBy(['admin' => false]);
+        // Injection du repository directement via l'EntityManager
+        $guests = $this->entityManager->getRepository(User::class)->findBy(['admin' => false]);
         return $this->render('front/guests.html.twig', [
             'guests' => $guests
         ]);
     }
 
-    /**
-     * @Route("/guest/{id}", name="guest")
-     */
+    #[Route('/guest/{id}', name: 'guest')]
     public function guest(int $id)
     {
-        $guest = $this->getDoctrine()->getRepository(User::class)->find($id);
+        // Recherche du guest via le repository
+        $guest = $this->entityManager->getRepository(User::class)->find($id);
+        
+        if (!$guest) {
+            throw $this->createNotFoundException('Guest not found');
+        }
+
         return $this->render('front/guest.html.twig', [
             'guest' => $guest
         ]);
     }
 
-    /**
-     * @Route("/portfolio/{id}", name="portfolio")
-     */
+    #[Route('/portfolio/{id}', name: 'portfolio')]
     public function portfolio(?int $id = null)
     {
-        $albums = $this->getDoctrine()->getRepository(Album::class)->findAll();
-        $album = $id ? $this->getDoctrine()->getRepository(Album::class)->find($id) : null;
-        $user = $this->getDoctrine()->getRepository(User::class)->findOneByAdmin(true);
+        // Récupération des albums, et du média en fonction de l'album ou de l'utilisateur
+        $albums = $this->entityManager->getRepository(Album::class)->findAll();
+        $album = $id ? $this->entityManager->getRepository(Album::class)->find($id) : null;
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['admin' => true]);
 
         $medias = $album
-            ? $this->getDoctrine()->getRepository(Media::class)->findByAlbum($album)
-            : $this->getDoctrine()->getRepository(Media::class)->findByUser($user);
+            ? $this->entityManager->getRepository(Media::class)->findBy(['album' => $album])
+            : $this->entityManager->getRepository(Media::class)->findBy(['user' => $user]);
+
         return $this->render('front/portfolio.html.twig', [
             'albums' => $albums,
             'album' => $album,
@@ -59,9 +65,7 @@ class HomeController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/about", name="about")
-     */
+    #[Route('/about', name: 'about')]
     public function about()
     {
         return $this->render('front/about.html.twig');
