@@ -9,6 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -23,16 +24,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private bool $admin = false;
 
-    #[ORM\Column]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 3, max: 50)]
+    #[ORM\Column(nullable: false)]
     private ?string $username;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description;
 
+    #[Assert\NotBlank]
+    #[Assert\Email]
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user')]
+    /**
+     * @var Collection<int, Media>
+     */
+    #[ORM\OneToMany(targetEntity: Media::class, mappedBy: 'user', cascade: ['remove'])]
     private Collection $medias;
 
     #[ORM\Column]
@@ -40,6 +48,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private array $roles = [];
+
+
+    #[ORM\Column(options: ["default" => false])]
+    private bool $restricted = false;   
 
     public function __construct()
     {
@@ -145,6 +157,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+
+    public function isRestricted(): ?bool
+    {
+        return $this->restricted;
+    }
+
+    public function setRestricted(bool $restricted): static
+    {
+        $this->restricted = $restricted;
+
+        return $this;
+    }
+
+        public function addMedia(Media $media): static
+    {
+        if (!$this->medias->contains($media)) {
+            $this->medias[] = $media;
+            $media->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeMedia(Media $media): static
+    {
+        if ($this->medias->removeElement($media)) {
+            if ($media->getUser() === $this) {
+                $media->setUser(null);
+            }
+        }
+        return $this;
+    }
+
 
     /**
      * A visual identifier that represents this user.
