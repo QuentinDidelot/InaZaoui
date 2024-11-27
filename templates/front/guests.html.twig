@@ -5,14 +5,17 @@
         <div class="col-12">
             <h3 class="mb-5">Invités</h3>
             <div class="guests d-flex flex-column">
-                {% for guest in guests %}
-                    <div class="guest py-5 d-flex justify-content-between align-items-center">
-                        <h4>{{ guest.username }} ({{ guest.medias|length }})</h4>
-                        <a href="{{ path('guest', {id: guest.id}) }}">découvrir</a>
-                    </div>
-                {% endfor %}
+                {% if guests|length > 0 %}
+                    {% for guest in guests %}
+                        <div class="guest py-5 d-flex justify-content-between align-items-center">
+                            <h4>{{ guest.username }} ({{ guest.medias|length }})</h4>
+                            <a href="{{ path('guest', {id: guest.id}) }}">découvrir</a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Aucun invité n'est disponible pour le moment.</p>
+                {% endif %}
             </div>
         </div>
     </div>
 {% endblock %}
-
