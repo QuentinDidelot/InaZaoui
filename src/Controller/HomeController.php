@@ -7,6 +7,7 @@ use App\Entity\Media;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class HomeController extends AbstractController
@@ -22,48 +23,54 @@ class HomeController extends AbstractController
     }
 
     #[Route('/guests', name: 'guests')]
-    public function guests()
+    public function guests(): Response
     {
-        // Injection du repository directement via l'EntityManager
-        $guests = $this->entityManager->getRepository(User::class)->findBy(['admin' => false]);
+        // Récupération des invités non restreints
+        $guests = $this->entityManager->getRepository(User::class)->findBy([
+            'admin' => false,
+            'restricted' => false
+        ]);
+    
         return $this->render('front/guests.html.twig', [
-            'guests' => $guests
+            'guests' => $guests,
         ]);
     }
+    
 
     #[Route('/guest/{id}', name: 'guest')]
-    public function guest(int $id)
+    public function guest(int $id): Response
     {
-        // Recherche du guest via le repository
         $guest = $this->entityManager->getRepository(User::class)->find($id);
-        
-        if (!$guest) {
-            throw $this->createNotFoundException('Guest not found');
+    
+        if (!$guest || $guest->isRestricted()) {
+            throw $this->createNotFoundException('Guest not found or access restricted.');
         }
-
+    
         return $this->render('front/guest.html.twig', [
-            'guest' => $guest
+            'guest' => $guest,
         ]);
     }
+    
 
     #[Route('/portfolio/{id}', name: 'portfolio')]
-    public function portfolio(?int $id = null)
+    public function portfolio(?int $id = null): Response
     {
-        // Récupération des albums, et du média en fonction de l'album ou de l'utilisateur
+        $mediaRepo = $this->entityManager->getRepository(Media::class);
         $albums = $this->entityManager->getRepository(Album::class)->findAll();
         $album = $id ? $this->entityManager->getRepository(Album::class)->find($id) : null;
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['admin' => true]);
-
-        $medias = $album
-            ? $this->entityManager->getRepository(Media::class)->findBy(['album' => $album])
-            : $this->entityManager->getRepository(Media::class)->findBy(['user' => $user]);
-
+    
+        // Récupération des médias non restreints
+        $medias = $album 
+            ? $mediaRepo->findAllMediasNotRestrictedByAlbum($album)
+            : $mediaRepo->findAllMediasNotRestricted();
+    
         return $this->render('front/portfolio.html.twig', [
             'albums' => $albums,
             'album' => $album,
-            'medias' => $medias
+            'medias' => $medias,
         ]);
     }
+    
 
     #[Route('/about', name: 'about')]
     public function about()

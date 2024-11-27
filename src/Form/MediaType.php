@@ -35,22 +35,23 @@ class MediaType extends AbstractType
             ])
             ->add('title', TextType::class, [
                 'label' => 'Titre',
+                'required' => true,
+            ])
+            ->add('album', EntityType::class, [
+                'label' => 'Album',
+                'required' => false,
+                'class' => Album::class,
+                'choice_label' => 'name',
             ])
         ;
 
-        if ($options['is_admin']) {
+        if ($options['is_admin'] === true) {
             $builder
                 ->add('user', EntityType::class, [
                     'label' => 'Utilisateur',
                     'required' => false,
                     'class' => User::class,
-                    'choice_label' => 'name',
-                ])
-                ->add('album', EntityType::class, [
-                    'label' => 'Album',
-                    'required' => false,
-                    'class' => Album::class,
-                    'choice_label' => 'name',
+                    'choice_label' => 'username',
                 ])
             ;
         }
