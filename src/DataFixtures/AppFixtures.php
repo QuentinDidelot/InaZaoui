@@ -11,22 +11,44 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
-
     public function __construct(private readonly UserPasswordHasherInterface $userPasswordHasher)
     {
     }
 
     public function load(ObjectManager $manager): void
     {
-        // Création d'un utilisateur ROLE_ADMIN
+        // Création d'un administrateur sans restriction
         $adminUser = new User();
         $adminUser->setUserName('ina');
-        $adminUser->setEmail('ina@mail.com');
+        $adminUser->setEmail('ina@gmail.com');
         $adminUser->setDescription('Description utilisateur Ina');
         $adminUser->setRoles(['ROLE_ADMIN']);
         $adminUser->setAdmin(true);
+        $adminUser->setRestricted(false);
         $adminUser->setPassword($this->userPasswordHasher->hashPassword($adminUser, 'password'));
         $manager->persist($adminUser);
+
+        // Création d'un utilisateur sans restriction
+        $guestUser = new User();
+        $guestUser->setUserName('guest');
+        $guestUser->setEmail('guest@example.com');
+        $guestUser->setDescription('Invité non restreint');
+        $guestUser->setRoles(['ROLE_USER']);  
+        $guestUser->setAdmin(false); 
+        $guestUser->setRestricted(false); 
+        $guestUser->setPassword($this->userPasswordHasher->hashPassword($guestUser, 'password'));
+        $manager->persist($guestUser);
+
+        // Création d'un utilisateur avec restriction
+        $restrictedUser = new User();
+        $restrictedUser->setUserName('kaidan');
+        $restrictedUser->setEmail('kaidan@gmail.com');
+        $restrictedUser->setDescription('Invité restreint');
+        $restrictedUser->setRoles(['ROLE_USER']);
+        $restrictedUser->setAdmin(false); 
+        $restrictedUser->setRestricted(true);
+        $restrictedUser->setPassword($this->userPasswordHasher->hashPassword($restrictedUser, 'password'));
+        $manager->persist($restrictedUser);
 
         // Création d'albums
         $albumAmerica = new Album();
@@ -55,7 +77,7 @@ class AppFixtures extends Fixture
         foreach ($americaMediaPath as $index => $path) {
             $media = new Media();
             $media->setPath($path);
-            $media->setTitle('Amerique'. ($index +1));
+            $media->setTitle('Amerique'. ($index + 1));
             $media->setAlbum($albumAmerica);
             $media->setUser($adminUser);
             $manager->persist($media);
@@ -67,11 +89,10 @@ class AppFixtures extends Fixture
             "uploads/uk-3.jpg"
         ];
 
-
         foreach ($europeMediaPath as $index => $path) {
             $media = new Media();
             $media->setPath($path);
-            $media->setTitle('Europe'. ($index +1));
+            $media->setTitle('Europe'. ($index + 1));
             $media->setAlbum($albumEurope);
             $media->setUser($adminUser);
             $manager->persist($media);
@@ -86,12 +107,11 @@ class AppFixtures extends Fixture
         foreach ($asiaMediaPath as $index => $path) {
             $media = new Media();
             $media->setPath($path);
-            $media->setTitle('Asia'. ($index +1));
+            $media->setTitle('Asia'. ($index + 1));
             $media->setAlbum($albumAsia);
             $media->setUser($adminUser);
             $manager->persist($media);
         }
-
 
         $africaMediaPath = [
             "uploads/af-1.jpg",
@@ -102,13 +122,13 @@ class AppFixtures extends Fixture
         foreach ($africaMediaPath as $index => $path) {
             $media = new Media();
             $media->setPath($path);
-            $media->setTitle('Afrique'. ($index +1));
+            $media->setTitle('Afrique'. ($index + 1));
             $media->setAlbum($albumAfrica);
             $media->setUser($adminUser);
             $manager->persist($media);
         }
 
+        // Flushing les données pour qu'elles soient persistant dans la base de données
         $manager->flush();
     }
-
 }

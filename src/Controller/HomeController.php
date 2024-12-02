@@ -41,9 +41,10 @@ class HomeController extends AbstractController
     public function guest(int $id): Response
     {
         $guest = $this->entityManager->getRepository(User::class)->find($id);
-    
+
+        // Si l'invité est introuvable ou restreint, rediriger vers la page des invités
         if (!$guest || $guest->isRestricted()) {
-            throw $this->createNotFoundException('Guest not found or access restricted.');
+            return $this->redirectToRoute('guests');
         }
     
         return $this->render('front/guest.html.twig', [
