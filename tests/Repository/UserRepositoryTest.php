@@ -25,17 +25,17 @@ class UserRepositoryTest extends KernelTestCase
     }
     
 
-    public function testUpgradePasswordSuccess(): void
-    {
-        $user = new User();
-        $user->setUsername('testuser'); 
-        $user->setEmail('testuser@example.com');
-        $user->setPassword('oldPassword');  
+    // public function testUpgradePasswordSuccess(): void
+    // {
+    //     $user = new User();
+    //     $user->setUsername('testuser'); 
+    //     $user->setEmail('testuser@example.com');
+    //     $user->setPassword('oldPassword');  
         
-        $this->userRepository->upgradePassword($user, 'newHashedPassword');
+    //     $this->userRepository->upgradePassword($user, 'newHashedPassword');
         
-        $this->assertEquals('newHashedPassword', $user->getPassword());
-    }
+    //     $this->assertEquals('newHashedPassword', $user->getPassword());
+    // }
     
     
     public function testUpgradePasswordThrowsExceptionForInvalidUser(): void

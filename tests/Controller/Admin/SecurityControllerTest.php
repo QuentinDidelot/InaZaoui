@@ -38,12 +38,12 @@ class SecurityControllerTest extends WebTestCase
         ]);
         self::assertNotNull($user);
     
-        $this->client->loginUser($user); // Connecte l'utilisateur
+        $this->client->loginUser($user); 
         $this->client->request('GET', '/logout');
-        self::assertResponseRedirects('/'); // Vérifie la redirection après déconnexion
+        self::assertResponseRedirects('/'); 
         $this->client->followRedirect();
     
-        self::assertSelectorExists('nav a[href="/login"]'); // Vérifie que le lien de connexion est visible
+        self::assertSelectorExists('nav a[href="/login"]');
     }
 
     // Teste qu'une tentative de connexion avec un nom d'utilisateur incorrect échoue
@@ -62,10 +62,10 @@ class SecurityControllerTest extends WebTestCase
         ]);
     
         $this->client->submit($form);
-        self::assertResponseRedirects('/login'); // Redirection après échec de la connexion
+        self::assertResponseRedirects('/login'); 
         $this->client->followRedirect();
     
-        self::assertSelectorTextContains('div.alert-danger', 'Invalid credentials.'); // Vérifie le message d'erreur
+        self::assertSelectorTextContains('div.alert-danger', 'Invalid credentials.');
     }
 
 
@@ -85,10 +85,10 @@ class SecurityControllerTest extends WebTestCase
             ]);
         
             $this->client->submit($form);
-            self::assertResponseRedirects('/login'); // Redirection après échec de la connexion
+            self::assertResponseRedirects('/login'); 
             $this->client->followRedirect();
         
-            self::assertSelectorTextContains('div.alert-danger', 'Invalid credentials.'); // Vérifie le message d'erreur
+            self::assertSelectorTextContains('div.alert-danger', 'Invalid credentials.'); 
         }
 
         
@@ -108,9 +108,8 @@ class SecurityControllerTest extends WebTestCase
         ]);
 
         $this->client->submit($form);
-        self::assertResponseRedirects('/login'); // Redirection après échec de la connexion
-
+        self::assertResponseRedirects('/login'); 
         $this->client->followRedirect();
-        self::assertSelectorTextContains('div', 'Votre compte a été suspendu.'); // Vérifie le message d'erreur spécifique
+        self::assertSelectorTextContains('div', 'Votre compte a été suspendu.'); 
     }
 }
