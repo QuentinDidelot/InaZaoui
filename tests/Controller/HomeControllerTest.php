@@ -16,6 +16,7 @@ class HomeControllerTest extends WebTestCase
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
 
+    // Configure l'environnement de test avant chaque test
     protected function setUp(): void
     {
         // Crée un client pour simuler des requêtes HTTP
@@ -24,6 +25,7 @@ class HomeControllerTest extends WebTestCase
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
     }
 
+    // Teste que la page d'accueil est accessible et contient le texte attendu
     public function testHomePage(): void
     {
         $this->client->request('GET', '/');
@@ -31,6 +33,7 @@ class HomeControllerTest extends WebTestCase
         self::assertSelectorTextContains('h2', 'Photographe');
     }
 
+    // Teste que la page des invités est accessible et contient le texte attendu
     public function testGuestsPage(): void
     {
         $this->client->request('GET', '/guests');
@@ -38,12 +41,14 @@ class HomeControllerTest extends WebTestCase
         self::assertSelectorTextContains('h3', 'Invités');
     }
 
+    // Teste que la page d'un invité inexistant redirige vers la page des invités
     public function testGuestPageRedirectsGuestNotFound(): void
     {
         $this->client->request('GET', '/guest/99999999');
         self::assertResponseRedirects('/guests');
     }
 
+    // Teste que la page d'un invité restreint redirige vers la page des invités
     public function testGuestPageRedirectsWhenGuestIsRestricted(): void
     {
         $guestRestricted = $this->entityManager->getRepository(User::class)->findOneBy([
@@ -56,6 +61,7 @@ class HomeControllerTest extends WebTestCase
         self::assertResponseRedirects('/guests');
     }
 
+    // Teste que la page d'un invité non restreint est accessible et affiche son nom
     public function testGuestPage(): void
     {
         $guest = $this->entityManager->getRepository(User::class)->findOneBy([
@@ -73,6 +79,7 @@ class HomeControllerTest extends WebTestCase
         self::assertSelectorTextContains('h3', $username);
     }
 
+    // Teste que la page du portfolio sans ID est accessible et affiche les albums et médias
     public function testPortfolioPageWithoutId(): void
     {
         $this->client->request('GET', '/portfolio');
@@ -93,6 +100,7 @@ class HomeControllerTest extends WebTestCase
         }
     }
 
+    // Teste que la page du portfolio avec un ID spécifique est accessible et affiche les médias correspondants
     public function testPortfolioPageWithId(): void
     {
         $albums = $this->entityManager->getRepository(Album::class)->findAll();
@@ -110,6 +118,7 @@ class HomeControllerTest extends WebTestCase
         }
     }
 
+    // Teste que la page "À propos" est accessible et contient le texte attendu
     public function testAboutPage(): void
     {
         $this->client->request('GET', '/about');
@@ -117,6 +126,7 @@ class HomeControllerTest extends WebTestCase
         self::assertSelectorTextContains('h2', 'Qui suis-je ?');
     }
 
+    // Libère les ressources et nettoie après chaque test
     protected function tearDown(): void
     {
         $this->entityManager->close();

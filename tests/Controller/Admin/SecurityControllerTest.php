@@ -13,6 +13,7 @@ class SecurityControllerTest extends WebTestCase
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;
 
+    // Configure l'environnement de test avant chaque test
     protected function setUp(): void
     {
         // Crée un client pour simuler des requêtes HTTP
@@ -21,7 +22,7 @@ class SecurityControllerTest extends WebTestCase
         $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
     }
 
-
+    // Teste que la page de connexion est accessible et contient le titre attendu
     public function testLoginPage(): void
     {
         $this->client->request('GET', '/login');
@@ -29,6 +30,7 @@ class SecurityControllerTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Connexion');
     }
 
+    // Teste que la déconnexion redirige correctement l'utilisateur vers la page d'accueil
     public function testLogoutRedirectsUser(): void
     {
         $user = $this->entityManager->getRepository(User::class)->findOneBy([
@@ -36,18 +38,17 @@ class SecurityControllerTest extends WebTestCase
         ]);
         self::assertNotNull($user);
     
-        $this->client->loginUser($user);
+        $this->client->loginUser($user); // Connecte l'utilisateur
         $this->client->request('GET', '/logout');
-        self::assertResponseRedirects('/');  
+        self::assertResponseRedirects('/'); // Vérifie la redirection après déconnexion
         $this->client->followRedirect();
     
-        self::assertSelectorExists('nav a[href="/login"]');  
+        self::assertSelectorExists('nav a[href="/login"]'); // Vérifie que le lien de connexion est visible
     }
-    
 
+    // Teste qu'une tentative de connexion avec un nom d'utilisateur incorrect échoue
     public function testIncorrectUsername(): void
     {
-        // Récupération d'un utilisateur non restreint
         $restrictedUser = $this->entityManager->getRepository(User::class)->findOneBy([
             'restricted' => false
         ]);
@@ -61,34 +62,37 @@ class SecurityControllerTest extends WebTestCase
         ]);
     
         $this->client->submit($form);
-        self::assertResponseRedirects('/login');
+        self::assertResponseRedirects('/login'); // Redirection après échec de la connexion
         $this->client->followRedirect();
     
-        self::assertSelectorTextContains('div.alert-danger', 'Invalid credentials.');
-    }
-    
-    public function testIncorrectPassword(): void
-    {
-        // Récupération d'un utilisateur non restreint
-        $restrictedUser = $this->entityManager->getRepository(User::class)->findOneBy([
-            'restricted' => false
-        ]);
-        self::assertNotNull($restrictedUser);
-
-        $crawler = $this->client->request('GET', '/login');
-
-        $form = $crawler->selectButton('Connexion')->form([
-            '_username' => $restrictedUser->getUsername(),
-            '_password' => 'incorrectPassword'
-        ]);
-    
-        $this->client->submit($form);
-        self::assertResponseRedirects('/login');
-        $this->client->followRedirect();
-    
-        self::assertSelectorTextContains('div.alert-danger', 'Invalid credentials.');
+        self::assertSelectorTextContains('div.alert-danger', 'Invalid credentials.'); // Vérifie le message d'erreur
     }
 
+
+        // Teste qu'une tentative de connexion avec un mot de passe incorrect échoue
+        public function testIncorrectPassword(): void
+        {
+            $restrictedUser = $this->entityManager->getRepository(User::class)->findOneBy([
+                'restricted' => false
+            ]);
+            self::assertNotNull($restrictedUser);
+    
+            $crawler = $this->client->request('GET', '/login');
+    
+            $form = $crawler->selectButton('Connexion')->form([
+                '_username' => $restrictedUser->getUsername(),
+                '_password' => 'incorrectPassword'
+            ]);
+        
+            $this->client->submit($form);
+            self::assertResponseRedirects('/login'); // Redirection après échec de la connexion
+            $this->client->followRedirect();
+        
+            self::assertSelectorTextContains('div.alert-danger', 'Invalid credentials.'); // Vérifie le message d'erreur
+        }
+
+        
+    // Teste qu'un utilisateur restreint ne peut pas se connecter
     public function testRestrictedUserCannotLogin(): void
     {
         $restrictedUser = $this->entityManager->getRepository(User::class)->findOneBy([
@@ -104,11 +108,9 @@ class SecurityControllerTest extends WebTestCase
         ]);
 
         $this->client->submit($form);
-        self::assertResponseRedirects('/login');
+        self::assertResponseRedirects('/login'); // Redirection après échec de la connexion
 
         $this->client->followRedirect();
-        self::assertSelectorTextContains('div', 'Votre compte a été suspendu.');
+        self::assertSelectorTextContains('div', 'Votre compte a été suspendu.'); // Vérifie le message d'erreur spécifique
     }
-    
-
 }

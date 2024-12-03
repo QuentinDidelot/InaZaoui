@@ -1,7 +1,4 @@
 <?php 
-// tests/Repository/UserRepositoryTest.php
-
-// tests/Repository/UserRepositoryTest.php
 
 namespace App\Tests\Repository;
 
@@ -16,7 +13,6 @@ class UserRepositoryTest extends KernelTestCase
 {
     private $userRepository;
     private $entityManager;
-
     protected function setUp(): void
     {
         self::bootKernel();
@@ -31,31 +27,27 @@ class UserRepositoryTest extends KernelTestCase
 
     public function testUpgradePasswordSuccess(): void
     {
-        // Crée une instance de User avec un username et un mot de passe initial
         $user = new User();
-        $user->setUsername('testuser');  // Définir un username valide
+        $user->setUsername('testuser'); 
         $user->setEmail('testuser@example.com');
-        $user->setPassword('oldPassword');  // Définir un mot de passe initial
+        $user->setPassword('oldPassword');  
         
-        // Appelle la méthode upgradePassword pour mettre à jour le mot de passe
         $this->userRepository->upgradePassword($user, 'newHashedPassword');
         
-        // Vérifie que le mot de passe a bien été mis à jour
         $this->assertEquals('newHashedPassword', $user->getPassword());
     }
     
     
     public function testUpgradePasswordThrowsExceptionForInvalidUser(): void
-{
-    // Crée un utilisateur non valide
-    $invalidUser = $this->createMock(PasswordAuthenticatedUserInterface::class);
+    {
+        // Crée un utilisateur non valide
+        $invalidUser = $this->createMock(PasswordAuthenticatedUserInterface::class);
 
-    // S'attendre à ce qu'une exception soit lancée
-    $this->expectException(UnsupportedUserException::class);
-    
-    // Appelle la méthode upgradePassword avec un mauvais type d'utilisateur
-    $this->userRepository->upgradePassword($invalidUser, 'newHashedPassword');
-}
+        $this->expectException(UnsupportedUserException::class);
+        
+        // Appelle la méthode upgradePassword avec un mauvais type d'utilisateur
+        $this->userRepository->upgradePassword($invalidUser, 'newHashedPassword');
+    }
 
     
     
