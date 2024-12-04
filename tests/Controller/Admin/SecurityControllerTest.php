@@ -30,6 +30,13 @@ class SecurityControllerTest extends WebTestCase
         self::assertSelectorTextContains('h1', 'Connexion');
     }
 
+    public function testLogOut() :void {
+        $this->client->request('GET', '/logout');
+        self::assertResponseRedirects('/'); 
+        $this->client->followRedirect();
+        self::assertResponseIsSuccessful();
+    }
+
     // Teste que la déconnexion redirige correctement l'utilisateur vers la page d'accueil
     public function testLogoutRedirectsUser(): void
     {

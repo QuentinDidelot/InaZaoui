@@ -40,14 +40,21 @@ class GuestController extends AbstractController
      * Permet d'ajouter un nouvel invité
      */
     #[Route('/admin/guest/add', name: 'admin_guest_add')]
-    public function add(Request $request): Response {
+    public function add(Request $request): Response
+    {
         $guest = new User();
         $form = $this->createForm(GuestType::class, $guest);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $password = $this->userPasswordHasher->hashPassword($guest, $guest->getPassword());
-            $guest->setPassword($password);
+            $plainPassword = $guest->getPassword();
+
+            // Vérifier que le mot de passe n'est pas null ou vide avant de le hacher
+            if ($plainPassword !== null && $plainPassword !== '') {
+                $password = $this->userPasswordHasher->hashPassword($guest, $plainPassword);
+                $guest->setPassword($password);
+            }
+
             $guest->setRoles(['ROLE_USER']);
             $guest->setAdmin(false);
             $guest->setRestricted(false);
@@ -57,7 +64,8 @@ class GuestController extends AbstractController
 
             return $this->redirectToRoute('admin_guest_index');
         }
-    return $this->render('admin/guest/add.html.twig', ['form' => $form->createView()]);
+
+        return $this->render('admin/guest/add.html.twig', ['form' => $form->createView()]);
     }
 
     /**
