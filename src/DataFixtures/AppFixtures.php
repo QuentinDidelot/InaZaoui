@@ -21,7 +21,7 @@ class AppFixtures extends Fixture
         $adminUser = new User();
         $adminUser->setUserName('ina');
         $adminUser->setEmail('ina@gmail.com');
-        $adminUser->setDescription('Description utilisateur Ina');
+        $adminUser->setDescription('Administratrice Ina');
         $adminUser->setRoles(['ROLE_ADMIN']);
         $adminUser->setAdmin(true);
         $adminUser->setRestricted(false);
@@ -30,8 +30,8 @@ class AppFixtures extends Fixture
 
         // Création d'un utilisateur sans restriction
         $guestUser = new User();
-        $guestUser->setUserName('guest');
-        $guestUser->setEmail('guest@example.com');
+        $guestUser->setUserName('john');
+        $guestUser->setEmail('john@gmail.com');
         $guestUser->setDescription('Invité non restreint');
         $guestUser->setRoles(['ROLE_USER']);  
         $guestUser->setAdmin(false); 

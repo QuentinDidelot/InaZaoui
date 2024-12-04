@@ -98,18 +98,21 @@ class SecurityControllerTest extends WebTestCase
         $restrictedUser = $this->entityManager->getRepository(User::class)->findOneBy([
             'restricted' => true
         ]);
-        self::assertNotNull($restrictedUser);
-
+    
+        // Fail the test if no restricted user is found
+        $this->assertNotNull($restrictedUser, 'No restricted user found.');
+    
         $crawler = $this->client->request('GET', '/login');
-
+    
         $form = $crawler->selectButton('Connexion')->form([
             '_username' => $restrictedUser->getUsername(),
             '_password' => 'password'
         ]);
-
+    
         $this->client->submit($form);
         self::assertResponseRedirects('/login'); 
         $this->client->followRedirect();
         self::assertSelectorTextContains('div', 'Votre compte a été suspendu.'); 
     }
+    
 }

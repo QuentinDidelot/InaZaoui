@@ -89,7 +89,7 @@ class GuestController extends AbstractController
     /**
      * Permet de supprimer un invité
      */
-    #[Route('/admin/guest/delete/{id}', name: 'admin_guest_delete')]
+    #[Route('/admin/guest/delete/{id}', name: 'admin_guest_delete', methods:'DELETE')]
     public function delete(User $user): RedirectResponse {
         $this->entityManager->remove($user);
         $this->entityManager->flush();
