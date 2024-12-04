@@ -24,29 +24,29 @@ class AppFixtures extends Fixture
         $adminUser->setDescription('Administratrice Ina');
         $adminUser->setRoles(['ROLE_ADMIN']);
         $adminUser->setAdmin(true);
-        $adminUser->setRestricted(false);
+        $adminUser->setRestricted(false);  // Non restreint
         $adminUser->setPassword($this->userPasswordHasher->hashPassword($adminUser, 'password'));
         $manager->persist($adminUser);
-
+    
         // Création d'un utilisateur sans restriction
         $guestUser = new User();
         $guestUser->setUserName('john');
         $guestUser->setEmail('john@gmail.com');
         $guestUser->setDescription('Invité non restreint');
-        $guestUser->setRoles(['ROLE_USER']);  
-        $guestUser->setAdmin(false); 
-        $guestUser->setRestricted(false); 
+        $guestUser->setRoles(['ROLE_USER']);
+        $guestUser->setAdmin(false);
+        $guestUser->setRestricted(false);  // Non restreint
         $guestUser->setPassword($this->userPasswordHasher->hashPassword($guestUser, 'password'));
         $manager->persist($guestUser);
-
+    
         // Création d'un utilisateur avec restriction
         $restrictedUser = new User();
         $restrictedUser->setUserName('kaidan');
         $restrictedUser->setEmail('kaidan@gmail.com');
         $restrictedUser->setDescription('Invité restreint');
         $restrictedUser->setRoles(['ROLE_USER']);
-        $restrictedUser->setAdmin(false); 
-        $restrictedUser->setRestricted(true);
+        $restrictedUser->setAdmin(false);
+        $restrictedUser->setRestricted(true);  // Restreint
         $restrictedUser->setPassword($this->userPasswordHasher->hashPassword($restrictedUser, 'password'));
         $manager->persist($restrictedUser);
 

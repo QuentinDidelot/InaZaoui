@@ -60,8 +60,8 @@ class MediaControllerTest extends WebTestCase
         // Soumettre le formulaire avec les données valides
         $this->client->submitForm('Ajouter', [
             'media[title]' => 'Test Media',
-            'media[user]' => 140, 
-            'media[album]' => 191, 
+            'media[user]' => "", 
+            'media[album]' => "", 
             'media[file]' => $uploadedFile,
         ]);
     
