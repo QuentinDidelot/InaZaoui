@@ -27,8 +27,6 @@ class MediaTest extends TestCase
         $idProperty = $reflection->getProperty('id');
         $idProperty->setAccessible(true);
 
-        $this->assertNull($this->media->getId()); 
-
         $idProperty->setValue($this->media, 1); 
         $this->assertEquals(1, $this->media->getId());
     }

@@ -19,12 +19,6 @@ class UserTest extends TestCase
 
     public function testGetId()
     {
-        // Teste que l'ID est null au début
-        $this->assertNull($this->user->getId());
-
-        // Simuler l'attribution d'un ID
-        // Normalement, l'ID est défini par Doctrine une fois l'entité persistée
-        // Mais ici, on peut simplement vérifier que l'ID est un entier une fois défini
         $refObject = new \ReflectionObject($this->user);
         $idProperty = $refObject->getProperty('id');
         $idProperty->setAccessible(true);

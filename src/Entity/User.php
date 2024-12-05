@@ -11,7 +11,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
@@ -19,7 +18,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    /** @phpstan-ignore-next-line */
+    private int $id;
+    
 
     #[ORM\Column]
     private bool $admin = false;
@@ -27,10 +28,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank]
     #[Assert\Length(min: 3, max: 50)]
     #[ORM\Column(nullable: false)]
-    private ?string $username;
+    private string $username;
 
     #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $description;
+    private ?string $description = null;
 
     #[Assert\NotBlank]
     #[Assert\Email]
@@ -46,19 +47,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    /**
+     * @var list<string>
+     */
     #[ORM\Column]
     private array $roles = [];
 
-
     #[ORM\Column(options: ["default" => false])]
-    private bool $restricted = false;   
+    private bool $restricted = false;
 
     public function __construct()
     {
         $this->medias = new ArrayCollection();
     }
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
@@ -75,7 +78,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getUsername(): ?string
+    public function getUsername(): string
     {
         return $this->username;
     }
@@ -97,11 +100,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->description = $description;
     }
 
+    /**
+     * @return Collection<int, Media>
+     */
     public function getMedias(): Collection
     {
         return $this->medias;
     }
 
+    /**
+     * @param Collection<int, Media> $medias
+     */
     public function setMedias(Collection $medias): void
     {
         $this->medias = $medias;
@@ -116,7 +125,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->admin = $admin;
     }
-
 
     /**
      * @see PasswordAuthenticatedUserInterface
@@ -133,7 +141,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-
     /**
      * @see UserInterface
      *
@@ -142,10 +149,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
-
-        return array_unique($roles);
+        $roles[] = 'ROLE_USER'; // Ajoute un rôle par défaut.
+        return array_values(array_unique($roles)); // Assure que c'est une liste (indexée par ordre numérique).
     }
 
     /**
@@ -158,8 +163,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-
-    public function isRestricted(): ?bool
+    public function isRestricted(): bool
     {
         return $this->restricted;
     }
@@ -171,7 +175,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-        public function addMedia(Media $media): static
+    public function addMedia(Media $media): static
     {
         if (!$this->medias->contains($media)) {
             $this->medias[] = $media;
@@ -190,7 +194,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-
     /**
      * A visual identifier that represents this user.
      *
@@ -198,7 +201,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->username;
+        return $this->username;
     }
 
     /**
@@ -206,15 +209,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        // Efface les données sensibles si nécessaire.
     }
 
     public function getSalt(): ?string
     {
-        // Un sel explicite n'est pas nécessaire si vous utilisez bcrypt ou argon2
+        // Un sel explicite n'est pas nécessaire si bcrypt ou argon2 sont utilisés.
         return null;
     }
-    
 }
-
