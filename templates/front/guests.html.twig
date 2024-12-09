@@ -8,13 +8,38 @@
                 {% if guests|length > 0 %}
                     {% for guest in guests %}
                         <div class="guest py-5 d-flex justify-content-between align-items-center">
-                            <h4>{{ guest.username }} ({{ guest.medias|length }})</h4>
-                            <a href="{{ path('guest', {id: guest.id}) }}">découvrir</a>
+                            <h4>{{ guest['username'] }} ({{ guest['mediaCount'] }})</h4>
+                            <a href="{{ path('guest', {id: guest['id']}) }}">découvrir</a>
                         </div>
                     {% endfor %}
                 {% else %}
                     <p>Aucun invité n'est disponible pour le moment.</p>
                 {% endif %}
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination mt-5">
+                <nav>
+                    <ul class="pagination">
+                        {% if currentPage > 1 %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ path('guests', {'page': currentPage - 1}) }}">Précédent</a>
+                            </li>
+                        {% endif %}
+
+                        {% for i in 1..totalPages %}
+                            <li class="page-item {{ i == currentPage ? 'active' : '' }}">
+                                <a class="page-link" href="{{ path('guests', {'page': i}) }}">{{ i }}</a>
+                            </li>
+                        {% endfor %}
+
+                        {% if currentPage < totalPages %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ path('guests', {'page': currentPage + 1}) }}">Suivant</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

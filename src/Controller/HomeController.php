@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\MediaRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -24,18 +25,42 @@ class HomeController extends AbstractController
     }
 
     #[Route('/guests', name: 'guests')]
-    public function guests(): Response
+    public function guests(Request $request): Response
     {
-        // Récupération des invités non restreints
-        $guests = $this->entityManager->getRepository(User::class)->findBy([
-            'admin' => false,
-            'restricted' => false,
-        ]);
-
+        $page = max(1, (int) $request->query->get('page', 1)); // Récupère la page, par défaut 1
+        $limit = 5; // Nombre de résultats par page
+        $offset = ($page - 1) * $limit;
+    
+        $query = $this->entityManager->createQuery(
+            'SELECT g.id, g.username, COUNT(m.id) AS mediaCount
+             FROM App\Entity\User g
+             LEFT JOIN g.medias m
+             WHERE g.admin = false AND g.restricted = false
+             GROUP BY g.id
+             ORDER BY g.username ASC'
+        );
+    
+        // Ajouter pagination
+        $query->setFirstResult($offset);
+        $query->setMaxResults($limit);
+    
+        $guests = $query->getArrayResult();
+    
+        // Compter le nombre total d'invités pour calculer les pages
+        $totalGuests = $this->entityManager->createQuery(
+            'SELECT COUNT(DISTINCT g.id) FROM App\Entity\User g WHERE g.admin = false AND g.restricted = false'
+        )->getSingleScalarResult();
+    
+        $totalPages = (int) ceil($totalGuests / $limit);
+    
         return $this->render('front/guests.html.twig', [
             'guests' => $guests,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
+    
+    
 
     #[Route('/guest/{id}', name: 'guest')]
     public function guest(int $id): Response
