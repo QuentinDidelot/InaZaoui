@@ -23,56 +23,77 @@ class MediaRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Media[] Returns an array of Media objects
-     * @phpstan-return array<Media>
+     * Récupère les médias non restreints avec pagination
+     * 
+     * @param int $limit Le nombre maximal d'éléments à retourner
+     * @param int $offset L'offset pour la pagination
+     * 
+     * @return Media[] Retourne un tableau de médias
      */
-    public function findAllMediasNotRestricted(): array
+    public function findAllMediasNotRestrictedWithPagination(int $limit, int $offset): array
     {
         return $this->createQueryBuilder('media')
             ->join('media.user', 'user')
             ->where('user.restricted = false')
+            ->setFirstResult($offset)   // Applique l'offset pour la pagination
+            ->setMaxResults($limit)     // Applique la limite pour la pagination
             ->getQuery()
             ->getResult();
     }
 
     /**
-     * @param Album $album
-     * @return Media[] Returns an array of Media objects
-     * @phpstan-return array<Media>
+     * Récupère les médias non restreints d'un album spécifique avec pagination
+     * 
+     * @param Album $album L'album pour lequel récupérer les médias
+     * @param int $limit Le nombre maximal d'éléments à retourner
+     * @param int $offset L'offset pour la pagination
+     * 
+     * @return Media[] Retourne un tableau de médias
      */
-    public function findAllMediasNotRestrictedByAlbum(Album $album): array
+    public function findAllMediasNotRestrictedByAlbumWithPagination(Album $album, int $limit, int $offset): array
     {
         return $this->createQueryBuilder('media')
             ->join('media.user', 'user')
             ->where('user.restricted = false')
             ->andWhere('media.album = :album')
             ->setParameter('album', $album)
+            ->setFirstResult($offset)   // Applique l'offset pour la pagination
+            ->setMaxResults($limit)     // Applique la limite pour la pagination
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * Compte le nombre de médias pour un album spécifique
+     * 
+     * @param Album $album L'album pour lequel compter les médias
+     * 
+     * @return int Retourne le nombre de médias dans cet album
+     */
+    public function countMediasByAlbum(Album $album): int
+    {
+        return (int) $this->createQueryBuilder('media')
+            ->join('media.user', 'user')
+            ->where('user.restricted = false')
+            ->andWhere('media.album = :album')
+            ->setParameter('album', $album)
+            ->select('COUNT(media.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Compte le nombre total de médias
+     * 
+     * @return int Retourne le nombre total de médias
+     */
+    public function countAllMedias(): int
+    {
+        return (int) $this->createQueryBuilder('media')
+            ->join('media.user', 'user')
+            ->where('user.restricted = false')
+            ->select('COUNT(media.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }
-
-//    /**
-//     * @return Media[] Returns an array of Media objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('m.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Media
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }

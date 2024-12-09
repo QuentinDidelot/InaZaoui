@@ -18,15 +18,56 @@
                     </div>
                 {% endfor %}
             </div>
+            
             <div class="row">
                 {% for media in medias %}
                     <div class="col-4 media mb-4">
-                        <img class="w-100" src="{{ asset(media.path) }}" alt="{{ media.title }}">
+                        <!-- Lazy loading et placeholder -->
+                        <img class="w-100" src="/placeholder.jpg" data-src="{{ asset(media.path) }}" alt="{{ media.title }}" loading="lazy">
                         <p class="text-center mb-0 mt-2 media-title">{{ media.title }}</p>
                     </div>
                 {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination mt-5 d-flex justify-content-center">
+                {% if currentPage > 1 %}
+                    <a class="btn btn-light mx-1" href="{{ path('portfolio', {id: album ? album.id : null, page: 1}) }}">
+                        Première page
+                    </a>
+                    <a class="btn btn-light mx-1" href="{{ path('portfolio', {id: album ? album.id : null, page: currentPage - 1}) }}">
+                        Page précédente
+                    </a>
+                {% endif %}
+
+                {% for i in (currentPage - 2)..(currentPage + 2) %}
+                    {% if i > 0 and i <= totalPages %}
+                        <a class="btn mx-1 {{ i == currentPage ? 'btn-primary' : 'btn-light' }}" href="{{ path('portfolio', {id: album ? album.id : null, page: i}) }}">
+                            {{ i }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if currentPage < totalPages %}
+                    <a class="btn btn-light mx-1" href="{{ path('portfolio', {id: album ? album.id : null, page: currentPage + 1}) }}">
+                        Page suivante
+                    </a>
+                    <a class="btn btn-light mx-1" href="{{ path('portfolio', {id: album ? album.id : null, page: totalPages}) }}">
+                        Dernière page
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
 {% endblock %}
 
+{% block javascripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Charger les images de manière lazy
+            document.querySelectorAll('img[data-src]').forEach(img => {
+                img.src = img.dataset.src;
+            });
+        });
+    </script>
+{% endblock %}

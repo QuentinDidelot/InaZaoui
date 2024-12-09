@@ -27,7 +27,7 @@ class HomeController extends AbstractController
     #[Route('/guests', name: 'guests')]
     public function guests(Request $request): Response
     {
-        $page = max(1, (int) $request->query->get('page', 1)); // Récupère la page, par défaut 1
+        $page = max(1, (int) $request->query->get('page', 1));
         $limit = 5; // Nombre de résultats par page
         $offset = ($page - 1) * $limit;
     
@@ -78,24 +78,36 @@ class HomeController extends AbstractController
     }
 
     #[Route('/portfolio/{id}', name: 'portfolio')]
-    public function portfolio(?int $id = null): Response
+    public function portfolio(Request $request, ?int $id = null): Response
     {
-        /** @var MediaRepository $mediaRepo */ // Annotation pour PHPStan
         $mediaRepo = $this->entityManager->getRepository(Media::class);
         $albums = $this->entityManager->getRepository(Album::class)->findAll();
         $album = $id ? $this->entityManager->getRepository(Album::class)->find($id) : null;
 
-        // Récupération des médias non restreints
-        $medias = $album 
-            ? $mediaRepo->findAllMediasNotRestrictedByAlbum($album)
-            : $mediaRepo->findAllMediasNotRestricted();
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = 9;
+        $offset = ($page - 1) * $limit;
+
+        $medias = $album
+            ? $mediaRepo->findAllMediasNotRestrictedByAlbumWithPagination($album, $limit, $offset)
+            : $mediaRepo->findAllMediasNotRestrictedWithPagination($limit, $offset);
+
+        // Total pour calculer les pages
+        $totalMedias = $album
+            ? $mediaRepo->countMediasByAlbum($album)
+            : $mediaRepo->countAllMedias();
+
+        $totalPages = (int) ceil($totalMedias / $limit);
 
         return $this->render('front/portfolio.html.twig', [
             'albums' => $albums,
             'album' => $album,
             'medias' => $medias,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
+    
 
     #[Route('/about', name: 'about')]
     public function about(): Response // Correction du type de retour manquant
