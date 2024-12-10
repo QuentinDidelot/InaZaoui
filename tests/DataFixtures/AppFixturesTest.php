@@ -35,9 +35,9 @@ class AppFixturesTest extends KernelTestCase
         $fixtures->load($this->entityManager);
 
         // Vérifie que les albums ont été créés correctement
-        $album1 = $this->entityManager->getRepository(Album::class)->findOneBy(['name' => 'Asie']);
+        $album1 = $this->entityManager->getRepository(Album::class)->findOneBy(['name' => 'Nature']);
         $this->assertNotNull($album1);
-        $this->assertEquals('Asie', $album1->getName());
+        $this->assertEquals('Nature', $album1->getName());
 
 
     }
