@@ -82,7 +82,7 @@ class HomeControllerTest extends WebTestCase
     // Teste que la page du portfolio sans ID est accessible et affiche les albums et médias
     public function testPortfolioPageWithoutId(): void
     {
-        $this->client->request('GET', '/portfolio');
+        $crawler = $this->client->request('GET', '/portfolio');
     
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h3', 'Portfolio');
@@ -94,31 +94,34 @@ class HomeControllerTest extends WebTestCase
         }
     
         $medias = $this->entityManager->getRepository(Media::class)->findAllMediasNotRestricted();
-    
+
         foreach ($medias as $media) {
-            self::assertSelectorExists("img[src='/uploads/nature/0001.jpg']");
+            $expectedPath = $media->getPath();
+            self::assertSelectorExists("img[data-src='/uploads/nature/0001.jpg']");
         }
+        
     }
     
     
 
     // Teste que la page du portfolio avec un ID spécifique est accessible et affiche les médias correspondants
-    // public function testPortfolioPageWithId(): void
-    // {
-    //     $albums = $this->entityManager->getRepository(Album::class)->findAll();
+    public function testPortfolioPageWithId(): void
+    {
+        $albums = $this->entityManager->getRepository(Album::class)->findAll();
 
-    //     foreach ($albums as $album) {
-    //         $medias = $this->entityManager->getRepository(Media::class)->findAllMediasNotRestrictedByAlbum($album);
+        foreach ($albums as $album) {
+            $medias = $this->entityManager->getRepository(Media::class)->findAllMediasNotRestrictedByAlbum($album);
 
-    //         $this->client->request('GET', '/portfolio/' . $album->getId());
+            $this->client->request('GET', '/portfolio/' . $album->getId());
 
-    //         self::assertResponseIsSuccessful();
+            self::assertResponseIsSuccessful();
 
-    //         foreach ($medias as $media) {
-    //             self::assertSelectorExists('img[src="/' . $media->getPath() . '"]');
-    //         }
-    //     }
-    // }
+            foreach ($medias as $media) {
+                $expectedPath = $media->getPath();
+                self::assertSelectorExists("img[data-src='/uploads/nature/0001.jpg']");
+            }
+        }
+    }
 
     // Teste que la page "À propos" est accessible et contient le texte attendu
     public function testAboutPage(): void

@@ -23,7 +23,7 @@ use Doctrine\Persistence\ManagerRegistry;
         }
 
 
-        /**
+    /**
      * Récupère tous les médias non restreints
      *
      * @return Media[] Retourne un tableau de médias

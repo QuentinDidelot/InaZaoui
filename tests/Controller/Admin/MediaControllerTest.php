@@ -107,10 +107,15 @@ class MediaControllerTest extends WebTestCase
     public function testDeleteNonExistentMedia(): void
     {
         $nonExistentId = 9999;
-
+    
+        // Exécuter la requête de suppression pour un média inexistant
         $this->client->request('GET', '/admin/media/delete/' . $nonExistentId);
-        $this->assertResponseStatusCodeSame(404, 'La suppression d\'un média inexistant ne renvoie pas une erreur 404.');
+    
+        // Vérifiez que la réponse est bien une erreur 404
+        $this->assertResponseStatusCodeSame(404, 'La suppression d\'un média inexistant devrait renvoyer une erreur 404.');
     }
+    
+    
 
     /*
     *Nettoyage après les tests
