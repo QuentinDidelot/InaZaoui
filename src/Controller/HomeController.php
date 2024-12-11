@@ -19,7 +19,7 @@ class HomeController extends AbstractController
     }
 
     #[Route('/', name: 'home')]
-    public function home(): Response // Correction du type de retour manquant
+    public function home(): Response
     {
         return $this->render('front/home.html.twig');
     }
@@ -30,7 +30,7 @@ class HomeController extends AbstractController
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = 5; // Nombre de résultats par page
         $offset = ($page - 1) * $limit;
-    
+
         $query = $this->entityManager->createQuery(
             'SELECT g.id, g.username, COUNT(m.id) AS mediaCount
              FROM App\Entity\User g
@@ -39,28 +39,26 @@ class HomeController extends AbstractController
              GROUP BY g.id
              ORDER BY g.username ASC'
         );
-    
+
         // Ajouter pagination
         $query->setFirstResult($offset);
         $query->setMaxResults($limit);
-    
+
         $guests = $query->getArrayResult();
-    
+
         // Compter le nombre total d'invités pour calculer les pages
-        $totalGuests = $this->entityManager->createQuery(
+        $totalGuests = (int) $this->entityManager->createQuery(
             'SELECT COUNT(DISTINCT g.id) FROM App\Entity\User g WHERE g.admin = false AND g.restricted = false'
         )->getSingleScalarResult();
-    
+
         $totalPages = (int) ceil($totalGuests / $limit);
-    
+
         return $this->render('front/guests.html.twig', [
             'guests' => $guests,
             'currentPage' => $page,
             'totalPages' => $totalPages,
         ]);
     }
-    
-    
 
     #[Route('/guest/{id}', name: 'guest')]
     public function guest(int $id): Response
@@ -80,6 +78,7 @@ class HomeController extends AbstractController
     #[Route('/portfolio/{id}', name: 'portfolio')]
     public function portfolio(Request $request, ?int $id = null): Response
     {
+        /** @var MediaRepository $mediaRepo */
         $mediaRepo = $this->entityManager->getRepository(Media::class);
         $albums = $this->entityManager->getRepository(Album::class)->findAll();
         $album = $id ? $this->entityManager->getRepository(Album::class)->find($id) : null;
@@ -94,8 +93,8 @@ class HomeController extends AbstractController
 
         // Total pour calculer les pages
         $totalMedias = $album
-            ? $mediaRepo->countMediasByAlbum($album)
-            : $mediaRepo->countAllMedias();
+            ? (int) $mediaRepo->countMediasByAlbum($album)
+            : (int) $mediaRepo->countAllMedias();
 
         $totalPages = (int) ceil($totalMedias / $limit);
 
@@ -107,10 +106,9 @@ class HomeController extends AbstractController
             'totalPages' => $totalPages,
         ]);
     }
-    
 
     #[Route('/about', name: 'about')]
-    public function about(): Response // Correction du type de retour manquant
+    public function about(): Response
     {
         return $this->render('front/about.html.twig');
     }

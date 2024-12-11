@@ -91,7 +91,7 @@ class AppFixtures extends Fixture
         $natureMediaPaths = [];
 
         for ($i = 1; $i <= $totalImages; $i++) {
-            $natureMediaPaths[] = "/uploads/nature/" . str_pad($i, 4, '0', STR_PAD_LEFT) . ".jpg";
+            $natureMediaPaths[] = "/uploads/nature/" . str_pad((string) $i, 4, '0', STR_PAD_LEFT) . ".jpg";
         }
 
         // Répartition égale des images entre les utilisateurs
@@ -117,7 +117,7 @@ class AppFixtures extends Fixture
         $manager->flush();
     }
 
-    private function compressImage(string $imagePath, $optimizerChain): void
+    private function compressImage(string $imagePath, \Spatie\ImageOptimizer\OptimizerChain $optimizerChain): void
     {
         if (file_exists($imagePath)) {
             $optimizerChain->optimize($imagePath);
