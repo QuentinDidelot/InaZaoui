@@ -2,7 +2,7 @@
 
 ## 🛠️ Technologies Utilisées
 ##### PHP 8.3
-##### Symfony
+##### Symfony 6.4 (LTS)
 ##### Visual Studio Code (VSC)
 ##### PHPUnit pour les tests
 ##### PHPStan pour l'analyse statique
