@@ -34,6 +34,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
         }
 
+        if (!$user instanceof PasswordAuthenticatedUserInterface) {
+            throw new UnsupportedUserException('This user is not supported');
+        }
+
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();

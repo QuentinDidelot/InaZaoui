@@ -38,7 +38,11 @@ class UserCheckerTest extends TestCase
         $user = $this->createMock(AppUser::class);
         $user->method('isRestricted')->willReturn(false);
         
-        $this->userChecker->checkPreAuth($user); // Ne doit pas lancer d'exception  
+        // Ne doit pas lancer d'exception
+        $this->userChecker->checkPreAuth($user); 
+        
+        // Ajouter une assertion explicite pour éviter le test risqué
+        $this->addToAssertionCount(1); 
     }
     
     public function testCheckPostAuthThrowsExceptionWhenUserAccountIsExpired(): void
@@ -60,6 +64,10 @@ class UserCheckerTest extends TestCase
         $user = $this->createMock(AppUser::class);
         $user->method('isRestricted')->willReturn(false);
         
-        $this->userChecker->checkPostAuth($user); // Ne doit pas lancer d'exception  
+        // Ne doit pas lancer d'exception
+        $this->userChecker->checkPostAuth($user); 
+        
+        // Ajouter une assertion explicite pour éviter le test risqué
+        $this->addToAssertionCount(1); 
     }
 }
