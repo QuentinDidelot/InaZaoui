@@ -2,33 +2,45 @@
 
 namespace App\Tests\Controller\Admin;
 
+use App\Entity\Album;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Repository\AlbumRepository;
+use Doctrine\ORM\EntityManagerInterface; // Import des interfaces nécessaires
+use Doctrine\ORM\EntityRepository;
 
-class AlbumControllerTest extends WebTestCase
+class AlbumControllerTest extends WebTestCase  
 {
     private KernelBrowser $client;
-    private AlbumRepository $albumRepository;
 
-    // Prépare le client et l'utilisateur administrateur pour les tests
-    protected function setUp(): void
+    /** @var EntityRepository<Album> */
+    private EntityRepository $albumRepository;
+    
+    protected function setUp(): void  
     {
         $this->client = static::createClient();
-
-        // Récupération du repository à partir du container
-        $this->albumRepository = static::getContainer()->get(AlbumRepository::class);
-
-        // Rechercher un utilisateur administrateur de test
-        $entityManager = $this->client->getContainer()->get('doctrine')->getManager();
+        
+        // Récupération de l'EntityManager pour le test  
+        /** @var EntityManagerInterface $entityManager */
+        $entityManager = $this->client->getContainer()->get('doctrine.orm.entity_manager');
+        
+        // Récupération du repository spécifique de type AlbumRepository  
+        $this->albumRepository = $entityManager->getRepository(Album::class);
+    
+        // Vérifier si l'albumRepository est bien typé  
+        $this->assertInstanceOf(AlbumRepository::class, $this->albumRepository);
+    
+        // Récupérer l'utilisateur administrateur  
         $adminUser = $entityManager->getRepository(User::class)->findOneBy(['email' => 'ina@gmail.com']);
-
-        // Vérifiez si l'utilisateur existe dans la base de données de test
+        
+        // Vérifier si l'utilisateur existe dans la base de données de test  
         $this->assertNotNull($adminUser, 'Le compte administrateur n\'existe pas dans la base de données de test.');
-
+        
         $this->client->loginUser($adminUser);
     }
+    
+    
 
     // Teste l'affichage de la liste des albums
     public function testIndex(): void
@@ -52,7 +64,8 @@ class AlbumControllerTest extends WebTestCase
     public function testUpdateAlbum(): void
     {
         // Utilisation de l'albumRepository injecté
-        $album = $this->albumRepository->findOneBy(['name'=>'Test Album']);
+        $album = $this->albumRepository->findOneBy(['name' => 'Test Album']);
+        $this->assertNotNull($album, 'L\'album "Test Album" n\'a pas été trouvé dans la base de données.');
 
         $this->client->request('GET', '/admin/album/update/' . $album->getId());
         $this->assertResponseIsSuccessful();
@@ -66,7 +79,8 @@ class AlbumControllerTest extends WebTestCase
     public function testDeleteAlbum(): void
     {
         // Utilisation de l'albumRepository injecté
-        $album = $this->albumRepository->findOneBy(["name"=>"Updated Album"]);
+        $album = $this->albumRepository->findOneBy(["name" => "Updated Album"]);
+        $this->assertNotNull($album, 'L\'album "Updated Album" n\'a pas été trouvé dans la base de données.');
 
         $this->client->request('GET', '/admin/album/delete/' . $album->getId());
         $this->assertResponseRedirects('/admin/album');
