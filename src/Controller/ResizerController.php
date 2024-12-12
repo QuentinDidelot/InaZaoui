@@ -16,7 +16,6 @@ class ResizerController extends AbstractController
     #[Route("/optimize", name: "optimize_images")]
     public function optimizeImages(): Response
     {
-        // Vérifier que 'kernel.project_dir' existe et est une chaîne de caractères
         $projectDir = $this->getParameter('kernel.project_dir');
         
         if (!is_string($projectDir)) {
