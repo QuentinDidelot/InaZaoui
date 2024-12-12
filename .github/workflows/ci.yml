@@ -19,7 +19,7 @@ jobs:
         image: mysql:8.0
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-          MYSQL_DATABASE: inazaoui_test
+          MYSQL_DATABASE: inaZaoui_test
           MYSQL_ROOT_PASSWORD: ""
         ports:
           - 3306:3306
