@@ -6,17 +6,19 @@ use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Repository\AlbumRepository;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
-
 
 class AlbumControllerTest extends WebTestCase
 {
     private KernelBrowser $client;
+    private AlbumRepository $albumRepository;
 
     // Prépare le client et l'utilisateur administrateur pour les tests
     protected function setUp(): void
     {
         $this->client = static::createClient();
+
+        // Récupération du repository à partir du container
+        $this->albumRepository = static::getContainer()->get(AlbumRepository::class);
 
         // Rechercher un utilisateur administrateur de test
         $entityManager = $this->client->getContainer()->get('doctrine')->getManager();
@@ -49,8 +51,8 @@ class AlbumControllerTest extends WebTestCase
     // Teste la mise à jour d'un album existant
     public function testUpdateAlbum(): void
     {
-        $albumRepository = static::getContainer()->get(AlbumRepository::class);
-        $album = $albumRepository->findOneBy(['name'=>'Test Album' ]);
+        // Utilisation de l'albumRepository injecté
+        $album = $this->albumRepository->findOneBy(['name'=>'Test Album']);
 
         $this->client->request('GET', '/admin/album/update/' . $album->getId());
         $this->assertResponseIsSuccessful();
@@ -63,13 +65,12 @@ class AlbumControllerTest extends WebTestCase
     // Teste la suppression d'un album existant
     public function testDeleteAlbum(): void
     {
-        $albumRepository = static::getContainer()->get(AlbumRepository::class);
-        $album = $albumRepository->findOneBy(["name"=>"Updated Album"]);
+        // Utilisation de l'albumRepository injecté
+        $album = $this->albumRepository->findOneBy(["name"=>"Updated Album"]);
 
         $this->client->request('GET', '/admin/album/delete/' . $album->getId());
         $this->assertResponseRedirects('/admin/album');
     }
-
 
     // Teste la suppression d'un album inexistant
     public function testDeleteNonExistentAlbum(): void
@@ -79,7 +80,6 @@ class AlbumControllerTest extends WebTestCase
 
         $this->client->request('GET', '/admin/album/delete/' . $nonExistentId);
 
-        $this->assertResponseRedirects('/admin/media'); 
+        $this->assertResponseRedirects('/admin/media');
     }
-
 }

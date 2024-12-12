@@ -10,7 +10,7 @@ doctrine:
     orm:
         auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-        auto_mapping: true
+        auto_mapping: false
         controller_resolver:
             auto_mapping: true   # Ajouter cette ligne pour gérer la dépréciation de controller_resolver.auto_mapping
         mappings:

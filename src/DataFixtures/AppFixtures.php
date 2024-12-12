@@ -7,17 +7,32 @@ use App\Entity\Media;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-class AppFixtures extends Fixture implements ContainerAwareInterface
+class AppFixtures extends Fixture
 {
-    use ContainerAwareTrait;
+    private UserPasswordHasherInterface $userPasswordHasher;
+    private string $projectDir;
 
-    public function __construct(private readonly UserPasswordHasherInterface $userPasswordHasher)
+    // Injection des services nécessaires via le constructeur
+    public function __construct(UserPasswordHasherInterface $userPasswordHasher, ParameterBagInterface $params)
     {
+        $this->userPasswordHasher = $userPasswordHasher;
+    
+        // Récupère le paramètre 'kernel.project_dir'
+        $projectDir = $params->get('kernel.project_dir');
+    
+        // Vérifie si le paramètre est une chaîne valide, sinon lance une exception
+        if (!is_string($projectDir) || empty($projectDir)) {
+            throw new \RuntimeException('The project directory parameter is not a valid string.');
+        }
+    
+        // Assigne la valeur validée à la propriété $projectDir
+        $this->projectDir = $projectDir;
     }
+    
+    
 
     public function load(ObjectManager $manager): void
     {
@@ -86,14 +101,16 @@ class AppFixtures extends Fixture implements ContainerAwareInterface
         $manager->persist($albumNature);
 
         // Chemin du répertoire des images optimisées
-        $imagesDirectory = $this->container->getParameter('kernel.project_dir') . '/public/uploadsResized/nature/';
-        $imageFiles = array_diff(scandir($imagesDirectory), ['.', '..']); // Liste des fichiers
+        $imagesDirectory = $this->projectDir . '/public/uploadsResized/nature/';
+        $imageFiles = (is_array($scannedImages = scandir($imagesDirectory)) ? array_diff($scannedImages, ['.', '..']) : []);
 
         // Vérification si des images existent
         if (empty($imageFiles)) {
             throw new \Exception("Aucune image trouvée dans le répertoire : $imagesDirectory");
         }
 
+        sort($imageFiles);
+        
         // Distribution des images entre utilisateurs
         $totalImages = count($imageFiles);
         $imagesPerUser = intdiv($totalImages, count($users));
@@ -105,7 +122,7 @@ class AppFixtures extends Fixture implements ContainerAwareInterface
             $extraImages--;
 
             for ($i = 0; $i < $userImageCount && $imageIndex < $totalImages; $i++) {
-                $imageName = array_values($imageFiles)[$imageIndex];
+                $imageName = isset($imageFiles[$imageIndex]) ? $imageFiles[$imageIndex] : null;
                 $imagePath = "/uploadsResized/nature/" . $imageName;
 
                 $media = new Media();

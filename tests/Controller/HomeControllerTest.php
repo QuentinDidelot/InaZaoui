@@ -97,7 +97,7 @@ class HomeControllerTest extends WebTestCase
 
         foreach ($medias as $media) {
             $expectedPath = $media->getPath();
-            self::assertSelectorExists("img[data-src='/uploads/nature/0001.jpg']");
+            self::assertSelectorExists("img[data-src='/uploadsResized/nature/0001.webp']");
         }
         
     }
@@ -118,7 +118,7 @@ class HomeControllerTest extends WebTestCase
 
             foreach ($medias as $media) {
                 $expectedPath = $media->getPath();
-                self::assertSelectorExists("img[data-src='/uploads/nature/0001.jpg']");
+                self::assertSelectorExists("img[data-src='/uploadsResized/nature/0001.webp']");
             }
         }
     }
