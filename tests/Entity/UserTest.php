@@ -17,7 +17,7 @@ class UserTest extends TestCase
         $this->user = new User();
     }
 
-    public function testGetId()
+    public function testGetId(): void
     {
         $refObject = new \ReflectionObject($this->user);
         $idProperty = $refObject->getProperty('id');
@@ -26,29 +26,28 @@ class UserTest extends TestCase
         $this->assertSame(123, $this->user->getId());
     }
 
-    public function testGetSetEmail()
+    public function testGetSetEmail(): void
     {
         // Teste la méthode getEmail() et setEmail()
         $this->user->setEmail('john@me.com');
         $this->assertSame('john@me.com', $this->user->getEmail());
     }
 
-    public function testGetSetUsername()
+    public function testGetSetUsername(): void
     {
         // Teste la méthode getUsername() et setUsername()
         $this->user->setUsername('john');
         $this->assertSame('john', $this->user->getUsername());
     }
 
-    public function testGetSetDescription()
+    public function testGetSetDescription(): void
     {
         // Teste la méthode getDescription() et setDescription()
         $this->user->setDescription('Ceci est un test');
         $this->assertSame('Ceci est un test', $this->user->getDescription());
     }
 
-
-    public function testSetMedias()
+    public function testSetMedias(): void
     {
         // Crée une nouvelle collection de médias
         $media1 = new Media();
@@ -63,8 +62,8 @@ class UserTest extends TestCase
         $this->assertSame($media1, $this->user->getMedias()->first());
         $this->assertSame($media2, $this->user->getMedias()->last());
     }
-    
-    public function testAddMedia()
+
+    public function testAddMedia(): void
     {
         // Teste la méthode addMedia()
         $media = new Media();
@@ -75,7 +74,7 @@ class UserTest extends TestCase
         $this->assertSame($media, $this->user->getMedias()->first());
     }
 
-    public function testRemoveMedia()
+    public function testRemoveMedia(): void
     {
         // Teste la méthode removeMedia()
         $media = new Media();
@@ -91,14 +90,14 @@ class UserTest extends TestCase
         $this->assertCount(0, $this->user->getMedias());
     }
 
-    public function testGetSetPassword()
+    public function testGetSetPassword(): void
     {
         // Teste la méthode getPassword() et setPassword()
         $this->user->setPassword('john');
         $this->assertSame('john', $this->user->getPassword());
     }
 
-    public function testGetRoles()
+    public function testGetRoles(): void
     {
         // Teste la méthode getRoles()
         $this->user->setRoles(['ROLE_USER']);
@@ -107,7 +106,7 @@ class UserTest extends TestCase
         $this->assertContains('ROLE_USER', $roles);
     }
 
-    public function testIsAdmin()
+    public function testIsAdmin(): void
     {
         // Teste la méthode isAdmin() et setAdmin()
         $this->user->setAdmin(true);
@@ -117,7 +116,7 @@ class UserTest extends TestCase
         $this->assertFalse($this->user->isAdmin());
     }
 
-    public function testIsRestricted()
+    public function testIsRestricted(): void
     {
         // Teste la méthode isRestricted() et setRestricted()
         $this->user->setRestricted(true);
@@ -127,21 +126,21 @@ class UserTest extends TestCase
         $this->assertFalse($this->user->isRestricted());
     }
 
-    public function testGetUserIdentifier()
+    public function testGetUserIdentifier(): void
     {
         // Teste la méthode getUserIdentifier()
         $this->user->setUsername('john_sheppard');
         $this->assertSame('john_sheppard', $this->user->getUserIdentifier());
     }
 
-    public function testEraseCredentials()
+    public function testEraseCredentials(): void
     {
         // Teste la méthode eraseCredentials()
         $this->user->eraseCredentials();
         $this->assertNull($this->user->getPassword());
     }
 
-    public function testGetSalt()
+    public function testGetSalt(): void
     {
         // Teste la méthode getSalt(), qui est généralement inutile avec bcrypt ou argon2
         $this->assertNull($this->user->getSalt());

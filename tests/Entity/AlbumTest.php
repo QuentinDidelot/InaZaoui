@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class AlbumTest extends TestCase
 {
-    public function testGetId()
+    public function testGetId(): void
     {
         $album = new Album();
 
@@ -19,7 +19,7 @@ class AlbumTest extends TestCase
         $this->assertEquals(1, $album->getId());
     }
 
-    public function testGetName()
+    public function testGetName(): void
     {
         $album = new Album();
         $album->setName('Test Album');
@@ -27,7 +27,7 @@ class AlbumTest extends TestCase
         $this->assertEquals('Test Album', $album->getName());
     }
 
-    public function testSetName()
+    public function testSetName(): void
     {
         $album = new Album();
         $album->setName('Another Album');

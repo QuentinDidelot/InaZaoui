@@ -21,7 +21,7 @@ class MediaTest extends TestCase
      * Teste la méthode getId() et setId().
      * Vérifie que l'ID est correctement récupéré et peut être défini sur l'entité.
      */
-    public function testGetSetId()
+    public function testGetSetId(): void
     {
         $reflection = new \ReflectionClass(Media::class);
         $idProperty = $reflection->getProperty('id');
@@ -35,7 +35,7 @@ class MediaTest extends TestCase
      * Teste la méthode getUser() et setUser().
      * Vérifie que l'utilisateur associé à l'entité Media peut être défini et récupéré correctement.
      */
-    public function testGetSetUser()
+    public function testGetSetUser(): void
     {
         $user = new User(); 
         $this->media->setUser($user);
@@ -47,7 +47,7 @@ class MediaTest extends TestCase
      * Teste la méthode getAlbum() et setAlbum().
      * Vérifie que l'album associé à l'entité Media peut être défini et récupéré correctement.
      */
-    public function testGetSetAlbum()
+    public function testGetSetAlbum(): void
     {
         $album = new Album(); 
         $this->media->setAlbum($album); 
@@ -58,7 +58,7 @@ class MediaTest extends TestCase
      * Teste la méthode getPath() et setPath().
      * Vérifie que le chemin du fichier peut être défini et récupéré correctement.
      */
-    public function testGetSetPath()
+    public function testGetSetPath(): void
     {
         $path = 'path/to/media/file.jpg'; 
         $this->media->setPath($path);
@@ -70,7 +70,7 @@ class MediaTest extends TestCase
      * Teste la méthode getTitle() et setTitle().
      * Vérifie que le titre du fichier peut être défini et récupéré correctement.
      */
-    public function testGetSetTitle()
+    public function testGetSetTitle(): void
     {
         $title = 'Media title'; 
         $this->media->setTitle($title);
@@ -82,7 +82,7 @@ class MediaTest extends TestCase
      * Teste la méthode getFile() et setFile().
      * Vérifie que le fichier (UploadedFile) associé à l'entité peut être défini et récupéré correctement.
      */
-    public function testGetSetFile()
+    public function testGetSetFile(): void
     {
         // Crée un fichier temporaire pour simuler un fichier téléchargé
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_file_') . '.jpg';
@@ -104,7 +104,7 @@ class MediaTest extends TestCase
      * Teste la méthode setFile() avec une valeur nulle.
      * Vérifie que le fichier peut être défini à null et que cette valeur est correctement récupérée.
      */
-    public function testSetFileNull()
+    public function testSetFileNull(): void
     {
         $this->media->setFile(null);
         $this->assertNull($this->media->getFile()); 
