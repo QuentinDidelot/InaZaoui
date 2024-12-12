@@ -1,0 +1,78 @@
+name: Continuous integration
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  ci:
+    name: Continuous Integration 
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      fail-fast: false
+      matrix:
+        operating-system: [ubuntu-latest]
+        php-versions: ['8.2', '8.3']
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_DATABASE: inazaoui_test
+          MYSQL_ROOT_PASSWORD: ""
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP, with composer and extensions
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, xml, ctype, iconv, intl
+          tools: castor
+
+      - name: Set up database connection
+        run: echo "DATABASE_URL=mysql://root:@127.0.0.1:3306/inaZaoui?serverVersion=8.0.32&charset=utf8mb4" > .env.test.local
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Wait for MySQL
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -u root; do
+            echo "Waiting for MySQL..."
+            sleep 5
+          done
+
+      - name: Setup database
+        run: |
+          php bin/console doctrine:database:drop --force --env=test
+          php bin/console doctrine:database:create --env=test
+          php bin/console doctrine:schema:update --force --env=test
+          php bin/console doctrine:fixtures:load --env=test --no-interaction
+
+      - name: Tests
+        run: php bin/phpunit
+
+      - name: Analysis
+        run: php vendor/bin/phpstan
