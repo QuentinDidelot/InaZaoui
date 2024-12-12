@@ -61,6 +61,9 @@ class GuestControllerTest extends WebTestCase
         $this->assertResponseIsSuccessful();
     }
     
+    /*
+    * Teste l'ajout d'un nouveau invité
+    */
     public function testAddGuest(): void
     {
         $this->client->loginUser($this->getAdminUser());

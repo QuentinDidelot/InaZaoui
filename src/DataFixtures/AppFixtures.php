@@ -7,20 +7,20 @@ use App\Entity\Media;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Spatie\ImageOptimizer\OptimizerChainFactory;
 
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements ContainerAwareInterface
 {
+    use ContainerAwareTrait;
+
     public function __construct(private readonly UserPasswordHasherInterface $userPasswordHasher)
     {
     }
 
     public function load(ObjectManager $manager): void
     {
-        // Création de l'OptimizerChain pour compresser les images
-        $optimizerChain = OptimizerChainFactory::create();
-
         // Création des utilisateurs spécifiques
         $users = [];
         
@@ -85,42 +85,41 @@ class AppFixtures extends Fixture
         $albumNature->setName('Nature');
         $manager->persist($albumNature);
 
-        // Génération de 3000 chemins d'images dans "uploads/nature/"
-        $totalImages = 3000;
-        $imagesPerUser = intdiv($totalImages, count($users));
-        $natureMediaPaths = [];
+        // Chemin du répertoire des images optimisées
+        $imagesDirectory = $this->container->getParameter('kernel.project_dir') . '/public/uploadsResized/nature/';
+        $imageFiles = array_diff(scandir($imagesDirectory), ['.', '..']); // Liste des fichiers
 
-        for ($i = 1; $i <= $totalImages; $i++) {
-            $natureMediaPaths[] = "/uploads/nature/" . str_pad((string) $i, 4, '0', STR_PAD_LEFT) . ".jpg";
+        // Vérification si des images existent
+        if (empty($imageFiles)) {
+            throw new \Exception("Aucune image trouvée dans le répertoire : $imagesDirectory");
         }
 
-        // Répartition égale des images entre les utilisateurs
-        $imageIndex = 0;
+        // Distribution des images entre utilisateurs
+        $totalImages = count($imageFiles);
+        $imagesPerUser = intdiv($totalImages, count($users));
+        $extraImages = $totalImages % count($users);
 
+        $imageIndex = 0;
         foreach ($users as $user) {
-            for ($i = 0; $i < $imagesPerUser; $i++) {
-                $path = $natureMediaPaths[$imageIndex];
-                $this->compressImage($path, $optimizerChain);
+            $userImageCount = $imagesPerUser + ($extraImages > 0 ? 1 : 0);
+            $extraImages--;
+
+            for ($i = 0; $i < $userImageCount && $imageIndex < $totalImages; $i++) {
+                $imageName = array_values($imageFiles)[$imageIndex];
+                $imagePath = "/uploadsResized/nature/" . $imageName;
 
                 $media = new Media();
-                $media->setPath($path);
-                $media->setTitle('Nature Image ' . ($imageIndex + 1));
+                $media->setPath($imagePath);
+                $media->setTitle("Image Nature $imageIndex");
                 $media->setAlbum($albumNature);
                 $media->setUser($user);
-                $manager->persist($media);
 
+                $manager->persist($media);
                 $imageIndex++;
             }
         }
 
         // Flushing pour enregistrer les modifications
         $manager->flush();
-    }
-
-    private function compressImage(string $imagePath, \Spatie\ImageOptimizer\OptimizerChain $optimizerChain): void
-    {
-        if (file_exists($imagePath)) {
-            $optimizerChain->optimize($imagePath);
-        }
     }
 }

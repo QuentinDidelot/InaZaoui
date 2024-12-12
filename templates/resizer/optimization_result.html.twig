@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Image Optimization Results{% endblock %}
+
+{% block body %}
+    <h1>Image Optimization Results</h1>
+    <ul>
+        {% for message in app.flashes('success') %}
+            <li class="success">{{ message }}</li>
+        {% endfor %}
+        {% for message in app.flashes('error') %}
+            <li class="error">{{ message }}</li>
+        {% endfor %}
+        {% for message in app.flashes('warning') %}
+            <li class="warning">{{ message }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

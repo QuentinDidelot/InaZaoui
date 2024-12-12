@@ -69,8 +69,8 @@ use Doctrine\Persistence\ManagerRegistry;
         return $this->createQueryBuilder('media')
             ->join('media.user', 'user')
             ->where('user.restricted = false')
-            ->setFirstResult($offset)   // Applique l'offset pour la pagination
-            ->setMaxResults($limit)     // Applique la limite pour la pagination
+            ->setFirstResult($offset)  
+            ->setMaxResults($limit)  
             ->getQuery()
             ->getResult();
     }
@@ -91,8 +91,8 @@ use Doctrine\Persistence\ManagerRegistry;
             ->where('user.restricted = false')
             ->andWhere('media.album = :album')
             ->setParameter('album', $album)
-            ->setFirstResult($offset)   // Applique l'offset pour la pagination
-            ->setMaxResults($limit)     // Applique la limite pour la pagination
+            ->setFirstResult($offset)   
+            ->setMaxResults($limit)   
             ->getQuery()
             ->getResult();
     }
