@@ -94,6 +94,41 @@ php -d memory_limit=-1 vendor/bin/phpunit --coverage-html cover --testdox --stop
 
 Après l'exécution, vous pouvez ouvrir le fichier index.html générés dans le dossier `cover` avec votre navigateur pour visualiser le rapport détaillé de couverture de code.
 
+### Optimisation des images
+
+## Instructions
+
+Pour effectuer des tests, un dossier dédié existe pour stocker les images : `public/uploads/nature` (le dossier "nature" doit être créé s'il n'existe pas). Ce dossier constitue un "album" de test destiné au chargement des fixtures.
+
+### Étapes
+
+1. **Préparation des images**
+   - Placez les images dans le dossier `./nature`.
+
+2. **Utilisation de la méthode OptimizeImage**
+   - Cette méthode est présente dans le `ResizerController`.
+   - **Note importante** : Vous devez disposer des droits administrateur/trice pour appeler cette méthode directement depuis le site.
+
+3. **Optimisation et conversion**
+   - La méthode `OptimizeImage()` a pour objectif d’optimiser et de reformater les images présentes dans le dossier `public/uploads/nature`.
+   - Les images optimisées seront enregistrées dans le dossier `public/uploadsResized/nature`.
+
+4. **Format et allègement**
+   - Les images seront converties au format **webp** (format adapté aux sites web).
+   - Elles seront également allégées pour améliorer les performances.
+
+---
+
+### Résumé des dossiers impliqués
+
+- **Dossier source** : `public/uploads/nature`
+- **Dossier cible** : `public/uploadsResized/nature`
+
+---
+
+⚠️ **Prérequis** : Assurez-vous que le dossier "nature" existe dans les deux répertoires avant de lancer l'optimisation.
+
+
 ### Serveur web
 ```bash
 symfony server:start
