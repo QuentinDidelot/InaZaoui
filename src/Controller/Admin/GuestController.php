@@ -49,7 +49,6 @@ class GuestController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $guest->getPassword();
 
-            // Vérifier que le mot de passe n'est pas null ou vide avant de le hacher
             if ($plainPassword !== null && $plainPassword !== '') {
                 $password = $this->userPasswordHasher->hashPassword($guest, $plainPassword);
                 $guest->setPassword($password);

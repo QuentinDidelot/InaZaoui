@@ -20,7 +20,6 @@ class UserCheckerTest extends TestCase
 
     public function testCheckPreAuthThrowsExceptionWhenUserIsRestricted(): void
     {
-        // Créer un mock de AppUser  
         /** @var \PHPUnit\Framework\MockObject\MockObject&UserInterface */
         $user = $this->createMock(AppUser::class);
         $user->method('isRestricted')->willReturn(true);
@@ -33,7 +32,6 @@ class UserCheckerTest extends TestCase
     
     public function testCheckPreAuthDoesNotThrowExceptionWhenUserIsNotRestricted(): void
     {
-        // Créer un mock de AppUser  
         /** @var \PHPUnit\Framework\MockObject\MockObject&UserInterface */
         $user = $this->createMock(AppUser::class);
         $user->method('isRestricted')->willReturn(false);
@@ -47,7 +45,6 @@ class UserCheckerTest extends TestCase
     
     public function testCheckPostAuthThrowsExceptionWhenUserAccountIsExpired(): void
     {
-        // Créer un mock de AppUser
         /** @var \PHPUnit\Framework\MockObject\MockObject&UserInterface */  
         $user = $this->createMock(AppUser::class);
         $user->method('isRestricted')->willReturn(true);
@@ -59,12 +56,10 @@ class UserCheckerTest extends TestCase
     
     public function testCheckPostAuthDoesNotThrowExceptionWhenUserAccountIsNotExpired(): void
     {
-        // Créer un mock de AppUser 
         /** @var \PHPUnit\Framework\MockObject\MockObject&UserInterface */
         $user = $this->createMock(AppUser::class);
         $user->method('isRestricted')->willReturn(false);
         
-        // Ne doit pas lancer d'exception
         $this->userChecker->checkPostAuth($user); 
         
         // Ajouter une assertion explicite pour éviter le test risqué

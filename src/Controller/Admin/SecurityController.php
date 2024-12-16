@@ -12,7 +12,7 @@ class SecurityController extends AbstractController
 {
 
     #[Route(path: '/login', name: 'admin_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response // Ajout du type de retour Response
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
@@ -24,7 +24,7 @@ class SecurityController extends AbstractController
     }
 
     #[Route(path: '/logout', name: 'admin_logout')]
-    public function logout(): void // Ajout du type de retour void
+    public function logout(): void 
     {
         // Symfony gère automatiquement la déconnexion, donc aucun code supplémentaire n'est nécessaire ici
     }

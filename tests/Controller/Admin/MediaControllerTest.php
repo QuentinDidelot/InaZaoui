@@ -52,7 +52,7 @@ class MediaControllerTest extends WebTestCase
     
         // Créer un fichier temporaire valide
         $tempFilePath = tempnam(sys_get_temp_dir(), 'test_media_') . '.jpg';
-        file_put_contents($tempFilePath, base64_decode('/9j/4AAQSkZJRgABAQEAAAAAAAD/4QAiRXhpZgAATU0A...')); // Contenu d'une image JPEG valide
+        file_put_contents($tempFilePath, base64_decode('/9j/4AAQSkZJRgABAQEAAAAAAAD/4QAiRXhpZgAATU0A...'));
         $uploadedFile = new UploadedFile(
             $tempFilePath,
             'test_image.jpg',

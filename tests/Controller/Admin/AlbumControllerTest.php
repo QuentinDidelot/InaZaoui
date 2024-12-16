@@ -7,7 +7,7 @@ use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Repository\AlbumRepository;
-use Doctrine\ORM\EntityManagerInterface; // Import des interfaces nécessaires
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 
 class AlbumControllerTest extends WebTestCase  

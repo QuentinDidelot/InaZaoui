@@ -13,13 +13,13 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use App\Entity\User; // Assurez-vous d'importer cette classe
+use App\Entity\User;
 
 #[IsGranted('ROLE_USER')]
 class MediaController extends AbstractController
 {
-    private EntityManagerInterface $entityManager;  // Ajout du type
-    private Filesystem $filesystem;  // Ajout du type
+    private EntityManagerInterface $entityManager;
+    private Filesystem $filesystem;
 
     public function __construct(EntityManagerInterface $entityManager, Filesystem $filesystem)
     {
@@ -32,8 +32,7 @@ class MediaController extends AbstractController
     {
         // Vérifie si l'utilisateur a le rôle ROLE_ADMIN
         if (!$this->isGranted('ROLE_ADMIN')) {
-            // Redirige les utilisateurs non admins vers la page d'accueil
-            return $this->redirectToRoute('home'); // Assure-toi que 'home' est bien le nom de ta route d'accueil
+            return $this->redirectToRoute('home');
         }
     
         // Logique existante pour les admins
