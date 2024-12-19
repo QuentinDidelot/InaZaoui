@@ -90,7 +90,7 @@ class MediaController extends AbstractController
     
             if ($file) {
                 // On récupère le titre de l'image, et on l'utilise comme base pour le nom du fichier
-                $title = $media->getTitle(); // On suppose que 'getTitle' est un champ du formulaire
+                $title = $media->getTitle();
     
                 // Génération du nom du fichier
                 $extension = $file->guessExtension(); // Extension de l'image (ex: jpg, png, etc.)
@@ -115,9 +115,16 @@ class MediaController extends AbstractController
     
                 // Sauvegarde de l'image avec le nouveau nom
                 $file->move($path, $newFileName);
-    
-                // Maintenant, on redimensionne l'image
-                $resizedImage = $resizer->resize($newFileName, $path, 'uploadsResized' . DIRECTORY_SEPARATOR . 'nature');
+
+                $resizedDirectory = 'uploadsResized';
+
+                
+                if(basename(strval(getcwd())) != 'public') {
+                    $resizedDirectory = 'public/' . $resizedDirectory; 
+                };
+
+                // On redimensionne l'image
+                $resizedImage = $resizer->resize($newFileName, $path, $resizedDirectory . DIRECTORY_SEPARATOR . 'nature');
 
                 // Vérification si le redimensionnement a réussi
                 if ($resizedImage !== false) {

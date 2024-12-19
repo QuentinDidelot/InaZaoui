@@ -50,9 +50,12 @@ class MediaControllerTest extends WebTestCase
         $this->client->request('GET', '/admin/media/add');
         $this->assertResponseIsSuccessful();
     
-        // Créer un fichier temporaire valide
-        $tempFilePath = tempnam(sys_get_temp_dir(), 'test_media_') . '.jpg';
-        file_put_contents($tempFilePath, base64_decode('/9j/4AAQSkZJRgABAQEAAAAAAAD/4QAiRXhpZgAATU0A...'));
+
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'testMedia3') . '.jpg';
+        if (!copy('tests\images\landscape.jpg', $tempFilePath)) {
+            throw new \Exception('Impossible de copier le fichier de test.');
+        }
+
         $uploadedFile = new UploadedFile(
             $tempFilePath,
             'test_image.jpg',
@@ -63,7 +66,7 @@ class MediaControllerTest extends WebTestCase
     
         // Soumettre le formulaire avec les données valides
         $this->client->submitForm('Ajouter', [
-            'media[title]' => 'Test Media',
+            'media[title]' => 'TestMedia3',
             'media[user]' => "", 
             'media[album]' => "", 
             'media[file]' => $uploadedFile,
@@ -73,9 +76,9 @@ class MediaControllerTest extends WebTestCase
     
         /** @var EntityManagerInterface $entityManager */
         $entityManager = $this->client->getContainer()->get('doctrine.orm.entity_manager');
-        $media = $entityManager->getRepository(Media::class)->findOneBy(['title' => 'Test Media']);
+        $media = $entityManager->getRepository(Media::class)->findOneBy(['title' => 'TestMedia3']);
         $this->assertNotNull($media, 'Le média n\'a pas été ajouté.');
-        $this->assertEquals('Test Media', $media->getTitle());
+        $this->assertEquals('TestMedia3', $media->getTitle());
 
         unlink($tempFilePath);
     }
