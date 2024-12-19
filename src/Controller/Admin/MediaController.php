@@ -14,6 +14,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use App\Entity\User;
+use App\Service\ResizerService;
 
 #[IsGranted('ROLE_USER')]
 class MediaController extends AbstractController
@@ -30,61 +31,100 @@ class MediaController extends AbstractController
     #[Route('/admin/media', name: 'admin_media_index')]
     public function index(Request $request): Response
     {
-        // Vérifie si l'utilisateur a le rôle ROLE_ADMIN
         if (!$this->isGranted('ROLE_ADMIN')) {
             return $this->redirectToRoute('home');
         }
     
-        // Logique existante pour les admins
-        $page = $request->query->getInt('page', 1);
-        $criteria = [];
+        // Pagination et limite
+        $page = max($request->query->getInt('page', 1), 1);
+        $limit = 25;
     
+        // Récupération des données
         $mediaRepository = $this->entityManager->getRepository(Media::class);
-        $medias = $mediaRepository->findBy(
-            $criteria,
-            ['id' => 'ASC'],
-            25, // Limit per page
-            25 * ($page - 1) // Offset
-        );
+        $total = $mediaRepository->count([]);
     
-        $total = $mediaRepository->count($criteria);
+        // Calcul du total de pages
+        $totalPages = (int)ceil($total / $limit);
+        
+        // Redirection si la page demandée dépasse le total
+        if ($page > $totalPages && $totalPages > 0) {
+            return $this->redirectToRoute('admin_media_index', ['page' => $totalPages]);
+        }
     
+        // Récupération des médias pour la page actuelle
+        $medias = $mediaRepository->createQueryBuilder('m')
+            ->orderBy('m.id', 'ASC')
+            ->setFirstResult($limit * ($page - 1))
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    
+        // Passage au template
         return $this->render('admin/media/index.html.twig', [
             'medias' => $medias,
             'total' => $total,
-            'page' => $page
+            'page' => $page,
+            'limit' => $limit,
+            'totalPages' => $totalPages,
         ]);
     }
+    
 
     #[Route('/admin/media/add', name: 'admin_media_add')]
     public function add(Request $request): Response
     {
+        $resizer = new ResizerService();
+    
         $media = new Media();
         $form = $this->createForm(MediaType::class, $media, ['is_admin' => $this->isGranted('ROLE_ADMIN')]);
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$this->isGranted('ROLE_ADMIN')) {
                 // Casting explicite du UserInterface à l'entité User
                 $media->setUser($this->getUser() instanceof User ? $this->getUser() : null);
             }
-
+    
             /** @var UploadedFile|null $file */
             $file = $media->getFile();
+    
             if ($file) {
-                $path = 'uploads/' . md5(uniqid()) . '.' . $file->guessExtension();
-                $media->setPath($path);
-                $file->move('uploads/', $path);
+                // On récupère le titre de l'image, et on l'utilise comme base pour le nom du fichier
+                $title = $media->getTitle(); // On suppose que 'getTitle' est un champ du formulaire
+    
+                // Génération du nom du fichier
+                $extension = $file->guessExtension(); // Extension de l'image (ex: jpg, png, etc.)
+                $baseName = $title . '.' . $extension;  // Nom de base de l'image
+    
+                // Vérification si le fichier existe déjà
+                $path = $this->getParameter('uploads') . DIRECTORY_SEPARATOR . 'nature';
+                $newFileName = $baseName;
+                $counter = 1;
+    
+                // Si le fichier existe déjà, on ajoute un suffixe (1), (2), etc.
+                while (file_exists($path . DIRECTORY_SEPARATOR . $newFileName)) {
+                    $newFileName = $title . '(' . $counter . ').' . $extension;
+                    $counter++;
+                }
+    
+                // Sauvegarde de l'image avec le nouveau nom
+                $file->move($path, $newFileName);
+    
+                // Maintenant, on redimensionne l'image
+                $resizedImage = $resizer->resize($newFileName, $path, 'uploadsResized' . DIRECTORY_SEPARATOR . 'nature');
+                $media->setPath(ltrim($resizedImage, DIRECTORY_SEPARATOR));
             }
-
+    
+            // Enregistrement du média dans la base de données
             $this->entityManager->persist($media);
             $this->entityManager->flush();
-
+    
             return $this->redirectToRoute('admin_media_index');
         }
-
+    
         return $this->render('admin/media/add.html.twig', ['form' => $form->createView()]);
     }
+    
 
     #[Route('/admin/media/delete/{id}', name: 'admin_media_delete')]
     public function delete(int $id): Response

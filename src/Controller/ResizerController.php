@@ -9,6 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Spatie\Image\Image;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\ResizerService;
 
 class ResizerController extends AbstractController
 {
@@ -39,7 +40,7 @@ class ResizerController extends AbstractController
             ]);
         }
 
-        $optimizerChain = OptimizerChainFactory::create();
+        // $optimizerChain = OptimizerChainFactory::create();
 
         // Filtrer les images valides (ignore les fichiers cachés et non-images)
         foreach ($images as $image) {
@@ -48,27 +49,35 @@ class ResizerController extends AbstractController
                 continue;
             }
 
-            $sourcePath = $imagesDirectory . DIRECTORY_SEPARATOR . $image;
-            $destinationPath = $resizedDirectory . DIRECTORY_SEPARATOR . pathinfo($image, PATHINFO_FILENAME) . '.webp';
+            // $sourcePath = $imagesDirectory . DIRECTORY_SEPARATOR . $image;
+            // $destinationPath = $resizedDirectory . DIRECTORY_SEPARATOR . pathinfo($image, PATHINFO_FILENAME) . '.webp';
 
             // Check if the file is an image
-            if (@getimagesize($sourcePath)) {
-                try {
-                    // Optimize and save the image
-                    Image::load($sourcePath)
-                        ->format('webp')
-                        ->quality(80)
-                        ->optimize($optimizerChain)
-                        ->save($destinationPath);
+            // if (@getimagesize($sourcePath)) {
+            //     try {
+            //         // Optimize and save the image
+            //         Image::load($sourcePath)
+            //             ->format('webp')
+            //             ->quality(80)
+            //             ->optimize($optimizerChain)
+            //             ->save($destinationPath);
 
-                    // Log success
-                    $this->addFlash('success', "Image optimized: $image");
-                } catch (\Exception $e) {
-                    // Log error
-                    $this->addFlash('error', "Failed to optimize $image: " . $e->getMessage());
-                }
+            //         // Log success
+            //         $this->addFlash('success', "Image optimized: $image");
+            //     } catch (\Exception $e) {
+            //         // Log error
+            //         $this->addFlash('error', "Failed to optimize $image: " . $e->getMessage());
+            //     }
+            // } else {
+            //     $this->addFlash('warning', "Skipped non-image file: $image");
+            // }
+            $resizerService = new ResizerService;
+
+            if($resizerService->resize($image, $imagesDirectory, $resizedDirectory))
+            {
+                $this->addFlash('success', "Image optimized: $image");
             } else {
-                $this->addFlash('warning', "Skipped non-image file: $image");
+                $this->addFlash('error', "Failed to optimize $image");
             }
         }
 
