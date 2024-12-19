@@ -52,7 +52,7 @@ class MediaControllerTest extends WebTestCase
     
 
         $tempFilePath = tempnam(sys_get_temp_dir(), 'testMedia3') . '.jpg';
-        if (!copy('tests\images\landscape.jpg', $tempFilePath)) {
+        if (!copy('tests/images/landscape.jpg', $tempFilePath)) {
             throw new \Exception('Impossible de copier le fichier de test.');
         }
 
