@@ -26,11 +26,9 @@ class ResizerService {
                 // Retourner le chemin relatif
                 return $relativePath;
             } catch (\Exception $e) {
-                dd($e->getMessage());
                 return false;
             }
         } else {
-            dd($sourcePath);
             return false;
         }
     }
