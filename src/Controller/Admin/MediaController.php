@@ -96,8 +96,14 @@ class MediaController extends AbstractController
                 $extension = $file->guessExtension(); // Extension de l'image (ex: jpg, png, etc.)
                 $baseName = $title . '.' . $extension;  // Nom de base de l'image
     
-                // Vérification si le fichier existe déjà
-                $path = $this->getParameter('uploads') . DIRECTORY_SEPARATOR . 'nature';
+                $uploadsDir = $this->getParameter('uploads');
+
+                // Assurer que c'est une chaîne de caractères avant de concaténer
+                if (!is_string($uploadsDir)) {
+                    throw new \InvalidArgumentException('Le paramètre "uploads" doit être une chaîne de caractères.');
+                }
+                
+                $path = $uploadsDir . DIRECTORY_SEPARATOR . 'nature';
                 $newFileName = $baseName;
                 $counter = 1;
     
@@ -112,7 +118,14 @@ class MediaController extends AbstractController
     
                 // Maintenant, on redimensionne l'image
                 $resizedImage = $resizer->resize($newFileName, $path, 'uploadsResized' . DIRECTORY_SEPARATOR . 'nature');
-                $media->setPath(ltrim($resizedImage, DIRECTORY_SEPARATOR));
+
+                // Vérification si le redimensionnement a réussi
+                if ($resizedImage !== false) {
+                    $media->setPath(ltrim($resizedImage, DIRECTORY_SEPARATOR));
+                } else {
+                    throw new \RuntimeException('Le redimensionnement de l\'image a échoué.');
+                }
+
             }
     
             // Enregistrement du média dans la base de données
